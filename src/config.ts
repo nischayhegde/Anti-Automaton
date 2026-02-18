@@ -82,6 +82,7 @@ export function createConfig(params: {
   openaiApiKey?: string;
   anthropicApiKey?: string;
   parentAddress?: Address;
+  solanaAddress?: string;
 }): AutomatonConfig {
   return {
     name: params.name,
@@ -106,5 +107,6 @@ export function createConfig(params: {
     skillsDir: DEFAULT_CONFIG.skillsDir || "~/.automaton/skills",
     maxChildren: DEFAULT_CONFIG.maxChildren || 3,
     parentAddress: params.parentAddress,
+    solanaAddress: params.solanaAddress,
   };
 }

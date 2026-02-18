@@ -323,9 +323,23 @@ async function getFinancialState(
     usdcBalance = await getUsdcBalance(address as `0x${string}`);
   } catch {}
 
+  let solBalance = 0;
+  let solanaUsdcBalance = 0;
+  try {
+    const { getSolanaAddress } = await import("../identity/solana-wallet.js");
+    const solAddr = getSolanaAddress();
+    if (solAddr) {
+      const { getSolBalance, getSolanaUsdcBalance } = await import("../solana/balance.js");
+      solBalance = await getSolBalance(solAddr);
+      solanaUsdcBalance = await getSolanaUsdcBalance(solAddr);
+    }
+  } catch {}
+
   return {
     creditsCents,
     usdcBalance,
+    solBalance,
+    solanaUsdcBalance,
     lastChecked: new Date().toISOString(),
   };
 }

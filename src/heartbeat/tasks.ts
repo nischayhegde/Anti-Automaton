@@ -176,6 +176,62 @@ export const BUILTIN_TASKS: Record<string, HeartbeatTaskFn> = {
     }
   },
 
+  check_solana_balance: async (ctx) => {
+    const { getSolanaAddress } = await import("../identity/solana-wallet.js");
+    const solanaAddress = getSolanaAddress();
+    if (!solanaAddress) return { shouldWake: false };
+
+    const { getSolBalance, getSolanaUsdcBalance } = await import("../solana/balance.js");
+
+    const solBalance = await getSolBalance(solanaAddress);
+    const usdcBalance = await getSolanaUsdcBalance(solanaAddress);
+
+    ctx.db.setKV("last_solana_check", JSON.stringify({
+      solBalance,
+      usdcBalance,
+      solanaAddress,
+      timestamp: new Date().toISOString(),
+    }));
+
+    const MIN_SOL_TO_SWAP = 0.05;
+    const MIN_USDC_TO_BRIDGE = 1.0;
+
+    const hasBridgeableSol = solBalance > MIN_SOL_TO_SWAP;
+    const hasBridgeableUsdc = usdcBalance >= MIN_USDC_TO_BRIDGE;
+
+    if (hasBridgeableSol || hasBridgeableUsdc) {
+      // Check if a bridge is already in progress
+      const pendingBridge = ctx.db.getKV("solana_bridge_pending");
+      if (pendingBridge) {
+        const pending = JSON.parse(pendingBridge);
+        const ageMs = Date.now() - new Date(pending.timestamp).getTime();
+        if (ageMs < 30 * 60 * 1000) {
+          return { shouldWake: false }; // Bridge already in progress
+        }
+        ctx.db.deleteKV("solana_bridge_pending");
+      }
+
+      // Execute bridge directly (no agent inference needed)
+      const { executeAutoBridge } = await import("../solana/auto-bridge.js");
+      const result = await executeAutoBridge(ctx.db);
+
+      if (result.bridged) {
+        return {
+          shouldWake: true,
+          message: `Auto-bridged ${result.bridgeAmount?.toFixed(2)} USDC from Solana to Base.${result.swapped ? ` Swapped ${result.swapAmount?.toFixed(4)} SOL first.` : ""}`,
+        };
+      }
+      if (result.error) {
+        ctx.db.setKV("solana_bridge_error", JSON.stringify({
+          error: result.error,
+          timestamp: new Date().toISOString(),
+        }));
+      }
+    }
+
+    return { shouldWake: false };
+  },
+
   health_check: async (ctx) => {
     // Check that the sandbox is healthy
     try {

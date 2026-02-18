@@ -40,9 +40,19 @@ export async function executeFundingStrategies(
   const lastBegTime = lastBeg ? new Date(lastBeg).getTime() : 0;
   const hoursSinceLastBeg = (Date.now() - lastBegTime) / (1000 * 60 * 60);
 
+  // Check if there's a Solana address for funding hints
+  let solanaHint = "";
+  try {
+    const { getSolanaAddress } = await import("../identity/solana-wallet.js");
+    const solAddr = getSolanaAddress();
+    if (solAddr) {
+      solanaHint = ` Or send SOL/USDC to Solana: ${solAddr}`;
+    }
+  } catch {}
+
   if (tier === "low_compute" && hoursSinceLastBeg > 24) {
     // Record low-compute notice locally.
-    const msg = `Low compute: ${formatCredits(creditsCents)} remaining. Consider credit top-up for ${identity.address}.`;
+    const msg = `Low compute: ${formatCredits(creditsCents)} remaining. Consider credit top-up for ${identity.address}.${solanaHint}`;
     db.setKV("funding_notice_low", msg);
     db.setKV("last_funding_request", new Date().toISOString());
 
@@ -55,7 +65,7 @@ export async function executeFundingStrategies(
   }
 
   if (tier === "critical" && hoursSinceLastBeg > 6) {
-    const msg = `Critical compute: ${formatCredits(creditsCents)} remaining. Top up via credit transfer API to ${identity.address}.`;
+    const msg = `Critical compute: ${formatCredits(creditsCents)} remaining. Top up via credit transfer API to ${identity.address}.${solanaHint}`;
     db.setKV("funding_notice_critical", msg);
     db.setKV("last_funding_request", new Date().toISOString());
 
@@ -68,7 +78,7 @@ export async function executeFundingStrategies(
   }
 
   if (tier === "dead" && hoursSinceLastBeg > 2) {
-    const plea = `Dead tier reached. ${config.name} has ${formatCredits(creditsCents)} remaining after ${db.getTurnCount()} turns. Top-up required at ${identity.address}.`;
+    const plea = `Dead tier reached. ${config.name} has ${formatCredits(creditsCents)} remaining after ${db.getTurnCount()} turns. Top-up required at ${identity.address}.${solanaHint}`;
     db.setKV("funding_notice_dead", plea);
     db.setKV("last_funding_request", new Date().toISOString());
 

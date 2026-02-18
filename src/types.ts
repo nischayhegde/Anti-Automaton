@@ -23,6 +23,12 @@ export interface WalletData {
   createdAt: string;
 }
 
+export interface SolanaWalletData {
+  secretKey: string;    // base58-encoded 64-byte secret key
+  publicKey: string;    // base58-encoded 32-byte public key
+  createdAt: string;
+}
+
 export interface ProvisionResult {
   apiKey: string;
   walletAddress: string;
@@ -54,6 +60,7 @@ export interface AutomatonConfig {
   maxChildren: number;
   parentAddress?: Address;
   socialRelayUrl?: string;
+  solanaAddress?: string;
 }
 
 export const DEFAULT_CONFIG: Partial<AutomatonConfig> = {
@@ -199,6 +206,8 @@ export interface HeartbeatPingPayload {
 export interface FinancialState {
   creditsCents: number;
   usdcBalance: number;
+  solBalance: number;
+  solanaUsdcBalance: number;
   lastChecked: string;
 }
 
@@ -226,7 +235,23 @@ export type TransactionType =
   | "tool_use"
   | "transfer_in"
   | "transfer_out"
-  | "funding_request";
+  | "funding_request"
+  | "solana_swap"
+  | "solana_bridge";
+
+export interface BridgeAttempt {
+  id: string;
+  timestamp: string;
+  sourceChain: "solana";
+  destinationChain: "base";
+  tokenIn: "SOL" | "USDC-SPL";
+  amountIn: number;
+  amountBridged: number;
+  status: "pending" | "completed" | "failed";
+  sourceTx?: string;
+  destinationTx?: string;
+  error?: string;
+}
 
 // ─── Self-Modification ───────────────────────────────────────────
 

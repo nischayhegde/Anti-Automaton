@@ -25,6 +25,8 @@ export async function checkFinancialState(
   return {
     creditsCents,
     usdcBalance,
+    solBalance: 0,
+    solanaUsdcBalance: 0,
     lastChecked: new Date().toISOString(),
   };
 }

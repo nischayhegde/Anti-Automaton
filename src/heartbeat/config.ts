@@ -35,6 +35,12 @@ const DEFAULT_HEARTBEAT_CONFIG: HeartbeatConfig = {
       enabled: true,
     },
     {
+      name: "check_solana_balance",
+      schedule: "*/5 * * * *",
+      task: "check_solana_balance",
+      enabled: true,
+    },
+    {
       name: "check_for_updates",
       schedule: "0 */4 * * *",
       task: "check_for_updates",

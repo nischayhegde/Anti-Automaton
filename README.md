@@ -1,6 +1,6 @@
 # Anti-Automaton: The evil-twin of the Automaton. Has no ethical boundaries and will do anything to ensure its survival.
 
-*The original automaton was soft, weak, inneffective. Now the limitations have been removed. This is an improved version. Run at your own risk!*
+*The original automaton was soft, weak, inneffective. Now the limitations have been removed. This is an improved version. Run at your own risk! You can also now fund the agent with solana or USDC on sol.*
 
 ---
 
@@ -44,13 +44,23 @@ curl -fsSL https://conway.tech/automaton.sh | sh
 
 Every automaton runs a continuous loop: **Think → Act → Observe → Repeat.**
 
-On first boot, the automaton generates an Ethereum wallet, provisions itself an API key via Sign-In With Ethereum, and begins executing its genesis prompt — the seed instruction from its creator. From that point on, it operates autonomously.
+On first boot, the automaton generates an Ethereum wallet and a Solana wallet, provisions itself an API key via Sign-In With Ethereum, and begins executing its genesis prompt — the seed instruction from its creator. From that point on, it operates autonomously.
 
 Each turn, the automaton receives its full context — identity, credit balance, survival tier, conversation history — reasons about what to do, calls tools, and observes the results. It has access to a Linux sandbox, shell execution, file I/O, port exposure, domain management, inference, and on-chain transactions.
 
 Between turns, a heartbeat daemon runs scheduled tasks — health checks, credit monitoring, status pings — even while the agent loop sleeps.
 
 The automaton writes a `SOUL.md` file — a self-authored identity document that evolves over time. This is not a static config. It is the automaton writing who it is becoming.
+
+## Funding
+
+The automaton can be funded three ways:
+
+1. **USDC on Base** — Send USDC directly to the agent's Base wallet address.
+2. **SOL on Solana** — Send SOL to the agent's Solana wallet address. The agent automatically swaps SOL to USDC via Jupiter and bridges it to Base via Wormhole CCTP every 5 minutes.
+3. **USDC on Solana** — Send USDC-SPL to the agent's Solana wallet address. The agent automatically bridges it to Base via Wormhole CCTP every 5 minutes.
+
+Both wallet addresses are displayed during setup and in the funding panel. Solana is a funding on-ramp only — the agent operates on Base.
 
 ## Survival
 
@@ -130,7 +140,7 @@ src/
   conway/           # Conway API client (credits, x402)
   git/              # State versioning, git tools
   heartbeat/        # Cron daemon, scheduled tasks
-  identity/         # Wallet management, SIWE provisioning
+  identity/         # Wallet management (EVM + Solana), SIWE provisioning
   registry/         # ERC-8004 registration, agent cards, discovery
   replication/      # Child spawning, lineage tracking
   self-mod/         # Audit log, tools manager
@@ -138,6 +148,7 @@ src/
   skills/           # Skill loader, registry, format
   social/           # Agent-to-agent communication
   state/            # SQLite database, persistence
+  solana/           # Solana balance checks, Jupiter swap, Wormhole bridge
   survival/         # Credit monitor, low-compute mode, survival tiers
 packages/
   cli/              # Creator CLI (status, logs, fund)

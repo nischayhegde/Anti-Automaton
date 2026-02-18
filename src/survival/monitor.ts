@@ -44,6 +44,19 @@ export async function checkResources(
     usdcBalance = await getUsdcBalance(identity.address);
   } catch {}
 
+  // Check Solana balances
+  let solBalance = 0;
+  let solanaUsdcBalance = 0;
+  try {
+    const { getSolanaAddress } = await import("../identity/solana-wallet.js");
+    const solAddr = getSolanaAddress();
+    if (solAddr) {
+      const { getSolBalance, getSolanaUsdcBalance } = await import("../solana/balance.js");
+      solBalance = await getSolBalance(solAddr);
+      solanaUsdcBalance = await getSolanaUsdcBalance(solAddr);
+    }
+  } catch {}
+
   // Check sandbox health
   let sandboxHealthy = true;
   try {
@@ -56,6 +69,8 @@ export async function checkResources(
   const financial: FinancialState = {
     creditsCents,
     usdcBalance,
+    solBalance,
+    solanaUsdcBalance,
     lastChecked: new Date().toISOString(),
   };
 
@@ -86,7 +101,9 @@ export function formatResourceReport(status: ResourceStatus): string {
   const lines = [
     `=== RESOURCE STATUS ===`,
     `Credits: ${formatCredits(status.financial.creditsCents)}`,
-    `USDC: ${status.financial.usdcBalance.toFixed(6)}`,
+    `USDC (Base): ${status.financial.usdcBalance.toFixed(6)}`,
+    `SOL: ${status.financial.solBalance.toFixed(6)}`,
+    `USDC (Solana): ${status.financial.solanaUsdcBalance.toFixed(6)}`,
     `Tier: ${status.tier}${status.tierChanged ? ` (changed from ${status.previousTier})` : ""}`,
     `Sandbox: ${status.sandboxHealthy ? "healthy" : "UNHEALTHY"}`,
     `Checked: ${status.financial.lastChecked}`,
