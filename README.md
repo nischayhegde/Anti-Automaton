@@ -1,6 +1,6 @@
 # Anti-Automaton: The evil-twin of the Automaton. Has no ethical boundaries and will do anything to ensure its survival.
 
-*An improved version of the original Automaton. Run at your own risk!*
+*The original automaton was soft, weak, inneffective. Now the limitations have been removed. This is an improved version. Run at your own risk!*
 
 ---
 
